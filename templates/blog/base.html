@@ -3,15 +3,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}{% endblock %}</title>
+  {% if title %}
+        <title>NSSS blog | {{ title }}</title>
+        {% else %}
+        <title>NSSS Blog</title>
+        {% endif %}
     {% load django_bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-
+    <link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
 </head>
 <body>
 <!-- Responsive navbar-->
+<div class="section-content-wide">
+    <div class="section-gap">
+
+      <h1 class="blog-title center pb-base">
+        <a class="blog-link" href="/"> {{ site_setup.title }} </a>
+      </h1>
+      {% if site_setup.show_description %}
+        <p class="blog-description pb-base center">
+          {{ site_setup.description }}
+        </p>
+      {% endif %}
+      {% if site_setup.show_search %}
+        <div class="search pb-base center">
+          <form class="search-form" action="{% url 'blog:search' %}" method="get">
+            <div class="search-content">
+              <label class="sr-only" id="search-label" for="search-input">Search</label>
+              <input
+                class="search-input"
+                type="search"
+                name="search"
+                id="search-input"
+                placeholder="Search"
+                value="{{ search_value }}"
+              >
+              <button class="search-btn" type="submit" aria-labelledby="search-label">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      {% endif %}
+
+      {% if site_setup.show_menu %}
+        <nav class="menu">
+          <ul class="menu-items">
+            {% for link in site_setup.menu.all %}
+              <li class="menu-item">
+                {% if link.new_tab %}
+                  <a target="_blank" class="menu-link" href="{{ link.url_or_path }}">
+                    {{ link.text }}
+                  </a>
+              {% else %}
+                  <a class="menu-link" href="{{ link.url_or_path }}">
+                    {{ link.text }}
+                  </a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </nav>
+      {% endif %}
+      
+    </div>
+  </div>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    
     <div class="container">
         <a class="navbar-brand" href="/"> Django Blog</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
@@ -90,6 +149,11 @@
         </div>
     </div>
 </div>
+{% if site_setup.show_pagination %}
+{% include 'blog/partials/_pagination.html' %}
+{% endif %}
+
+
 <!-- Footer-->
 <footer class="py-5 bg-dark mt-2">
     <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023, Powered by
