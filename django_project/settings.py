@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,8 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "accounts",
-    'django_summernote',  'django_bootstrap5','blog'
+   'simple_chatbot',
+   "crispy_forms",
+     "django_htmx",
+    "taggit",
+    'crispy_bootstrap4',
+    'django_summernote',  
+    'django_bootstrap5',
+    'blog',
+    'main'
 ]
 
 MIDDLEWARE = [
@@ -49,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = 'django_project.urls'
@@ -65,6 +73,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+             "builtins": ['blog.templatetags.tag_cloud',
+                         'blog.templatetags.markdown_processing', ] 
         },
     },
 ]
@@ -118,6 +128,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT  = os.path.join(BASE_DIR, 'bestbuyproject/staticfiles')
+
+STATICFILES_DIRS = [ 
+    os.path.join('static')
+]
 MEDIA_ROOT = BASE_DIR/'media'
 MEDIA_URL = '/media/'
 LOGIN_REDIRECT_URL = "/"
@@ -131,3 +146,16 @@ AUTHENTICATION_BACKENDS = (
 
     'django.contrib.auth.backends.ModelBackend',
 )
+
+# to remove black background from images
+THUMBNAIL_COLORSPACE = None
+THUMBNAIL_PRESERVE_FORMAT = True
+
+SIMPLE_CHATBOT = {
+    'responses': (
+        ("main.responses.GreetingResponse", "Greeting"),
+        ("main.responses.GoodbyeResponse", "Goodbye"),
+    ),
+}
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

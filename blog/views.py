@@ -1,117 +1,78 @@
-from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
+from django.views.generic import ListView, CreateView
+
+from blog.forms import PostSearchForm
 from blog.models import Post
-from django.db.models import Q
-PER_PAGE = 9
 
 
-def index(request):
-    posts = Post.objects.get_published()
+class HomeView(ListView):
+    model = Post
+    # template_name = 'blog/index.html'  # this is a variable that we can set up
+    context_object_name = "posts"
+    # context_object_name: this is reference to the data that is being collected from this class here or this view
+    # and being passed across to the template
+    paginate_by = 10
 
-    paginator = Paginator(posts, PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
+    def get_queryset(self):
+        x = Post.objects.filter(status='published')
+        return x
 
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-        }
-    )
-
-
-def created_by(request, author_pk):
-    posts = Post.objects.get_published()\
-    .filter(created_by__pk=author_pk)
-
-    paginator = Paginator(posts, PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-        }
-    )
-
-def category(request, slug):
-    posts = Post.objects.get_published()\
-    .filter(category__slug=slug)
-
-    paginator = Paginator(posts, PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-        }
-    )
-
-def tag(request, slug):
-    posts = Post.objects.get_published()\
-    .filter(tags__slug=slug)
-
-    paginator = Paginator(posts, PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': page_obj,
-        }
-    )
-
-def search(request):
-    search_value = request.GET.get('search', '').strip()
-
-    posts = (
-        Post.objects.get_published()
-        .filter(
-            Q(title__icontains=search_value) |
-            Q(excerpt__icontains=search_value) |
-            Q(content__icontains=search_value)
-        )[:PER_PAGE]
-
-    )
-
-    return render(
-        request,
-        'blog/pages/index.html',
-        {
-            'page_obj': posts,
-            'search_value': search_value,
-        }
-    )
-
-def page(request, slug):
-    return render(
-        request,
-        'blog/pages/page.html',
-        {
-            # 'page_obj': page_obj,
-        }
-    )
+    def get_template_names(self):
+        if self.request.htmx:
+            return "components/post-list-elements.html"
+        return 'blog/index.html'
 
 
-def post(request, slug):
-    post = (
-        Post.objects.get_published()
-        .filter(slug=slug)
-        .first()
-    )
+def post_single(request, post):
+    post = get_object_or_404(Post, slug=post, status='published')
+    related = Post.objects.filter(author=post.author)[:5]
+    return render(request, 'blog/single_post.html', {'post': post, 'related': related})
 
-    return render(
-        request,
-        'blog/pages/post.html',
-        {
-            'post': post,
-        }
-    )
+
+class TagListView(ListView):
+    model = Post
+    paginate_by = 10
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        # x = Post.objects.filter(tags__name=self.kwargs['tag'])
+        x = Post.objects.filter(status__exact='published', tags__name__in=[self.kwargs['tag']])
+        return x
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return "components/post-list-elements-tags.html"
+
+        return 'blog/tags.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(TagListView, self).get_context_data(**kwargs)
+        context['tag'] = self.kwargs['tag']
+
+        return context
+
+
+class PostSearchView(ListView):
+    model = Post
+    paginate_by = 10
+    context_object_name = 'posts'
+    form_class = PostSearchForm
+
+    def get_queryset(self):
+        form = self.form_class(self.request.GET)  # grab data from form
+        if form.is_valid():
+            return Post.objects.filter(status__exact='published', title__icontains=form.cleaned_data['q'])
+        return []
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return "components/post-list-elements-search.html"
+        return 'blog/search.html'
+
+
+class AddPostView(CreateView):
+    model = Post
+    fields = ['author', 'title', 'subtitle', 'slug', 'content', 'status', 'tags']
+
+    def get_template_names(self):
+        return 'blog/add_post.html'
