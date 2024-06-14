@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django_summernote',  
     'django_bootstrap5',
     'blog',
+     "reservation.apps.ReservationConfig",
+     "bootstrap_datepicker_plus",
     'main'
 ]
 
