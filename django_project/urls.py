@@ -14,13 +14,18 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
+from django.contrib.auth.views import PasswordResetCompleteView
+from django.urls import path, include
+from django.views.generic import TemplateView
+from django.views.i18n import set_language
 urlpatterns = [
     path('admin/', admin.site.urls), 
+     path("i18n/", set_language, name="set_language"),
      path('summernote/', include('django_summernote.urls')),
  path('main', include('main.urls')), path("reservation/", include("reservation.urls")),
     path('', include('blog.urls')),
+    path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/x-javascript')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
