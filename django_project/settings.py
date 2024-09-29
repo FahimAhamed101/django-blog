@@ -28,8 +28,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-SECRET_KEY = os.environ.get('SECRET_KEY')
-DEBUG = os.environ.get('DEBUG') == 'True'
+SECRET_KEY = 'django-insecure--fc4#e5d%9mdw9bs$y1sd#s#h%2i*)ak&(eb4*423k5j_mu&wx'
+DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -144,14 +144,19 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT  = os.path.join(BASE_DIR, 'bestbuyproject/staticfiles')
+STATIC_ROOT = BASE_DIR / 'static'
+STATIC_URL = '/static/'
+#STATIC_ROOT  = os.path.join(BASE_DIR, 'bestbuyproject/staticfiles')
 
-STATICFILES_DIRS = [ 
+"""STATICFILES_DIRS = [ 
     os.path.join('static')
-]
-MEDIA_ROOT = BASE_DIR/'media'
-MEDIA_URL = '/media/'
+]"""
+
+
+#MEDIA_ROOT = BASE_DIR/'media'
+#MEDIA_URL = '/media/'
+
+
 LOGIN_REDIRECT_URL = "/"
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 # Default primary key field type
